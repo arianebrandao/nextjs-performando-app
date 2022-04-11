@@ -1,4 +1,20 @@
-import { memo } from "react";
+import { memo, useState, lazy } from "react"; //usar lazy no react ou dynamic no next
+import { AddProductToWishlistProps } from "./AddProductToWishlist";
+import dynamic from "next/dynamic";
+//import { AddProductToWishlist } from "./AddProductToWishlist";
+
+const AddProductToWishlist = dynamic<AddProductToWishlistProps>(
+  () => {
+    // usando export default:
+    //return import('./AddProductToWishlist')
+    return import("./AddProductToWishlist").then(
+      (mod) => mod.AddProductToWishlist
+    );
+  },
+  {
+    loading: () => <span>Carregando...</span>,
+  }
+);
 
 interface ProductItemProps {
   product: {
@@ -11,12 +27,19 @@ interface ProductItemProps {
 }
 
 function ProductItemComponent({ product, onAddToWishlist }: ProductItemProps) {
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   return (
     <div>
       {product.title} - <strong>{product.priceFormatted}</strong>
-      <button onClick={() => onAddToWishlist(product.id)}>
-        Adicionar na lista de desejos
+      <button onClick={() => setIsAddingToWishlist(true)}>
+        Adicionar à lista de desejos
       </button>
+      {isAddingToWishlist && (
+        <AddProductToWishlist
+          onAddToWishlist={() => onAddToWishlist(product.id)}
+          onRequestClose={() => setIsAddingToWishlist(false)}
+        />
+      )}
     </div>
   );
 }
